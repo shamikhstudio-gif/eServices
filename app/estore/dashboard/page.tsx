@@ -168,9 +168,9 @@ function EstoreDashboardContent() {
       {/* Top Navbar */}
       <header className="white-navbar">
         <div className="white-navbar-brand">
-          <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717A', textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717A', textDecoration: 'none' }}>
             <ArrowRight size={16} />
-            <span style={{ fontSize: '13px', fontWeight: 600 }}>بوابة الخدمات</span>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>المتجر الرئيسي</span>
           </Link>
           <div style={{ width: '1px', height: '20px', backgroundColor: '#E4E4E7', margin: '0 8px' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -178,18 +178,17 @@ function EstoreDashboardContent() {
               <Store size={18} />
             </div>
             <div>
-              <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#09090B' }}>eStore التجارة السحابية</span>
-              <span style={{ fontSize: '10.5px', color: '#059669', marginRight: '6px', fontWeight: 600 }}>لوحة التاجر</span>
+              <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#09090B' }}>eStore Dashboard</span>
+              <span style={{ fontSize: '10.5px', color: '#059669', marginRight: '6px', fontWeight: 600 }}>لوحة التاجر المعتمد</span>
             </div>
           </div>
         </div>
 
         <div className="white-navbar-actions">
           <Link 
-            href="/estore/shop" 
-            target="_blank" 
+            href="/" 
             className="btn-white-secondary"
-            style={{ borderRadius: '10px', fontSize: '12.5px', padding: '6px 12px' }}
+            style={{ borderRadius: '10px', fontSize: '12.5px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
           >
             <span>معاينة متجر الزبائن</span>
             <ExternalLink size={13} />

@@ -10,7 +10,8 @@ import {
   ArrowRight, Check, Copy, ExternalLink, KeyRound,
   Laptop, Smartphone, Clock, Eye, EyeOff, Loader2,
   AlertCircle, Download, Trash2, LogOut, Grid, Sparkles,
-  Bell, Volume2, Globe, Shield, RefreshCw, CheckCircle2
+  Bell, Volume2, Globe, Shield, RefreshCw, CheckCircle2,
+  ShoppingBag, Store
 } from 'lucide-react';
 
 interface Profile {
@@ -312,9 +313,9 @@ export default function AccountManagementPage() {
           {/* Right: Brand & Breadcrumb */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Link
-              href="/services"
+              href="/estore/dashboard"
               className="btn-white-icon"
-              title="العودة إلى مركز الخدمات"
+              title="العودة إلى لوحة تحكم المتجر"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <ArrowRight size={18} />
@@ -337,10 +338,10 @@ export default function AccountManagementPage() {
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#09090B' }}>إدارة الحساب المركزية</span>
-                  <span className="account-status-pill primary">eIdentity</span>
+                  <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#09090B' }}>إدارة حساب التاجر</span>
+                  <span className="account-status-pill primary">eStore Merchant</span>
                 </div>
-                <div style={{ fontSize: '11px', color: '#71717A' }}>منظومة خدمات الشامخ السحابية الموحدة</div>
+                <div style={{ fontSize: '11px', color: '#71717A' }}>منصة التجارة الإلكترونية • estore.eshamikh.com</div>
               </div>
             </div>
           </div>
@@ -353,7 +354,7 @@ export default function AccountManagementPage() {
               <button
                 onClick={() => setWaffleOpen(!waffleOpen)}
                 className="btn-white-icon"
-                title="تطبيقات المنظومة"
+                title="أقسام المتجر"
               >
                 <Grid size={18} />
               </button>
@@ -373,13 +374,13 @@ export default function AccountManagementPage() {
                   animation: 'fadeIn 0.15s ease'
                 }}>
                   <div style={{ fontSize: '11px', fontWeight: 600, color: '#71717A', padding: '4px 8px 8px' }}>
-                    تطبيقات منظومة الشامخ
+                    منظومة متجر eStore
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     {[
-                      { name: 'مركز الخدمات', href: '/services', icon: <Sparkles size={16} /> },
-                      { name: 'منصة eLink', href: '/elink', icon: <Layers size={16} /> },
-                      { name: 'متجر eStore', href: '/estore/dashboard', icon: <Globe size={16} /> },
+                      { name: 'متجر الزبائن', href: '/', icon: <ShoppingBag size={16} /> },
+                      { name: 'لوحة التاجر', href: '/estore/dashboard', icon: <Store size={16} /> },
+                      { name: 'إدارة الحساب', href: '/account', icon: <User size={16} /> },
                       { name: 'بوابة الأمان', href: '/account', icon: <Shield size={16} /> },
                     ].map((app, idx) => (
                       <Link

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'eShamikh Cloud & Services Ecosystem | بوابة الخدمات السحابية',
-  description: 'منظومة الخدمات المركزية ومركز المصادقة الموحد التابع لـ eShamikh Studio',
+  title: 'eStore — منصة التجارة الإلكترونية الفاخرة | estore.eshamikh.com',
+  description: 'متجر الشامخ الفاخر للتجارة الإلكترونية ومنصة إدارة المبيعات للشركات والتجار | estore.eshamikh.com',
   icons: {
     icon: '/assets/logo.png',
   },

@@ -1,686 +1,756 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import UserAvatar from '@/components/UserAvatar';
-import { 
-  Lock, 
-  Mail, 
-  User, 
-  Eye, 
-  EyeOff, 
-  CheckCircle2, 
-  AlertCircle, 
-  LogOut, 
-  Copy, 
-  Check, 
-  ExternalLink, 
-  ShieldCheck, 
-  ArrowLeft,
+import Image from 'next/image';
+import {
+  ShoppingBag,
+  Search,
+  ShoppingCart,
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  Check,
+  ShieldCheck,
+  Truck,
+  ArrowRight,
+  Eye,
+  CreditCard,
   Sparkles,
-  Link2,
-  Compass,
+  ChevronLeft,
+  CheckCircle2,
   Store,
-  Layers
+  User
 } from 'lucide-react';
 
-function CentralSSOContent() {
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect_to');
+interface Product {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  image: string;
+  description: string;
+  colors: string[];
+  inStock: boolean;
+  rating: number;
+}
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+const PRODUCTS: Product[] = [
+  {
+    id: 'prod-1',
+    title: 'سماعات إشمخ اللاسلكية برو (Obsidian Edition)',
+    category: 'إلكترونيات',
+    price: 125000,
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
+    description: 'صوت مكاني نقي عالي الدقة مع عزل ضوضاء متكيف نشط وبطارية تدوم حتى 36 ساعة.',
+    colors: ['#09090B', '#E4E4E7', '#C5A059'],
+    inStock: true,
+    rating: 4.9,
+  },
+  {
+    id: 'prod-2',
+    title: 'ساعة يد رقمية ذكية الترا - سيراميك أبيض',
+    category: 'إكسسوارات',
+    price: 195000,
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
+    description: 'هيكل من السيراميك الفاخر مع شاشة ريتنا فائقة السطوع ومقاومة تامة للماء حتى عمق 50 متراً.',
+    colors: ['#FFFFFF', '#18181B'],
+    inStock: true,
+    rating: 4.8,
+  },
+  {
+    id: 'prod-3',
+    title: 'نظارة شمسية كلاسيكية عصرية بإطار تيتانيوم',
+    category: 'إكسسوارات',
+    price: 85000,
+    image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&q=80',
+    description: 'عدسات استقطابية يابانية بحماية 100% من الأشعة فوق البنفسجية وإطار فائق الخفة والمتانة.',
+    colors: ['#09090B', '#C5A059'],
+    inStock: true,
+    rating: 4.7,
+  },
+  {
+    id: 'prod-4',
+    title: 'حقيبة سفر جلدية مدمجة فاخرة (Minimal Carry)',
+    category: 'حقائب',
+    price: 140000,
+    image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80',
+    description: 'جلد طبيعي محبب مع سحابات يابانية مطلية ومقصورة مبطنة للابتوب والأجهزة اللوحية.',
+    colors: ['#18181B', '#78350F'],
+    inStock: true,
+    rating: 5.0,
+  },
+  {
+    id: 'prod-5',
+    title: 'لوحة مفاتيح ميكانيكية لاسلكية مخصصة (Gateron Pro)',
+    category: 'إلكترونيات',
+    price: 110000,
+    image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&q=80',
+    description: 'مفاتيح ميكانيكية ناعمة مبدلة على الساخن (Hot-swap) مع اتصال بلوتوث ثلاثي الأجهزة.',
+    colors: ['#FFFFFF', '#09090B'],
+    inStock: true,
+    rating: 4.9,
+  },
+  {
+    id: 'prod-6',
+    title: 'عطر الفخامة الأندلسي (خشب الصندل والعنبر الأبيض)',
+    category: 'عطور',
+    price: 95000,
+    image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80',
+    description: 'تركيبة عطرية هادئة وثابتة تدوم طوال اليوم مستخلصة من أفخر الزيوت الطبيعية.',
+    colors: ['#C5A059'],
+    inStock: true,
+    rating: 4.8,
+  },
+];
+
+interface CartItem {
+  product: Product;
+  quantity: number;
+  selectedColor?: string;
+}
+
+export default function EstoreRootHomePage() {
+  const [products] = useState<Product[]>(PRODUCTS);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [copiedId, setCopiedId] = useState(false);
+  // Cart State
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutComplete, setCheckoutComplete] = useState(false);
 
-  const supabase = createClient();
+  // Quick View State
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
-  useEffect(() => {
-    async function checkSession() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user);
-      if (user) {
-        try {
-          const { data: prof } = await supabase
-            .from('profiles')
-            .select('full_name, username, avatar_url, bio')
-            .eq('id', user.id)
-            .maybeSingle();
-          if (prof) setUserProfile(prof);
-        } catch (e) {
-          console.error('Failed to load profile:', e);
-        }
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    const matchesSearch = !searchQuery || 
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  function addToCart(product: Product, color?: string) {
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item =>
+          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
       }
-    }
-    checkSession();
-  }, []);
-
-  function translateAuthError(errorMessage: string): string {
-    if (!errorMessage) return 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى.';
-    const msg = errorMessage.toLowerCase();
-    if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
-      return 'بيانات الدخول غير صحيحة، يرجى التأكد من البريد وكلمة المرور.';
-    }
-    if (msg.includes('user already registered') || msg.includes('already registered')) {
-      return 'هذا البريد الإلكتروني مسجل بالفعل، يمكنك تسجيل الدخول مباشرة.';
-    }
-    if (msg.includes('password should be at least') || msg.includes('password is too short')) {
-      return 'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل.';
-    }
-    if (msg.includes('rate limit') || msg.includes('too many requests')) {
-      return 'تم تجاوز الحد المسموح من المحاولات، يرجى الانتظار قليلاً.';
-    }
-    if (msg.includes('invalid email') || msg.includes('unable to validate email')) {
-      return 'صيغة البريد الإلكتروني غير صالحة، يرجى إدخال بريد صحيح.';
-    }
-    return 'حدث خطأ أثناء معالجة الطلب، يرجى المحاولة لاحقاً.';
+      return [...prev, { product, quantity: 1, selectedColor: color || product.colors[0] }];
+    });
+    setCartOpen(true);
   }
 
-  async function handleSignIn(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (error) {
-        setMessage({ type: 'error', text: translateAuthError(error.message) });
-      } else {
-        setMessage({ type: 'success', text: 'تم تسجيل الدخول بنجاح! جاري تحويل الجلسة...' });
-        setCurrentUser(data.user);
-        setTimeout(() => {
-          window.location.href = redirectTo || '/services';
-        }, 600);
-      }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: translateAuthError(err.message) });
-    } finally {
-      setLoading(false);
-    }
+  function updateQuantity(productId: string, delta: number) {
+    setCart(prev =>
+      prev
+        .map(item => {
+          if (item.product.id === productId) {
+            const newQty = item.quantity + delta;
+            return newQty > 0 ? { ...item, quantity: newQty } : null;
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[]
+    );
   }
 
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
-            role: 'member',
-          },
-        },
-      });
-
-      if (error) {
-        setMessage({ type: 'error', text: translateAuthError(error.message) });
-      } else {
-        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-
-        if (!loginError && loginData?.user) {
-          setCurrentUser(loginData.user);
-          setMessage({ type: 'success', text: 'تم إنشاء الحساب وتفعيله فورياً بنجاح!' });
-        } else {
-          setCurrentUser(data.user);
-          setMessage({ type: 'success', text: 'تم إنشاء الحساب بنجاح وتم تفعيله سحابياً!' });
-        }
-
-        setTimeout(() => {
-          window.location.href = redirectTo || '/services';
-        }, 800);
-      }
-    } catch (err: any) {
-      setMessage({ type: 'error', text: translateAuthError(err.message) });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    setCurrentUser(null);
-    setMessage({ type: 'success', text: 'تم تسجيل الخروج بنجاح.' });
-  }
-
-  function handleCopyUserId() {
-    if (!currentUser?.id) return;
-    navigator.clipboard.writeText(currentUser.id);
-    setCopiedId(true);
-    setTimeout(() => setCopiedId(false), 2000);
+  function handleCheckout() {
+    if (cart.length === 0) return;
+    setCheckoutComplete(true);
+    setTimeout(() => {
+      setCart([]);
+      setCheckoutComplete(false);
+      setCartOpen(false);
+    }, 2800);
   }
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      backgroundColor: '#FAFAFA',
-      color: '#09090B',
-      display: 'flex',
-      flexDirection: 'column',
-      direction: 'rtl',
-    }}>
-      {/* Pristine White Navbar */}
+    <div className="white-app-container" dir="rtl">
+      {/* ── Top Storefront Navbar ── */}
       <header className="white-navbar">
-        <div className="white-navbar-brand">
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            backgroundColor: '#09090B',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '6px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-          }}>
-            <Image 
-              src="/assets/shamikh-logo-white.png" 
-              alt="eShamikh Logo" 
-              width={26}
-              height={26}
-              priority 
-            />
+        <div style={{ maxWidth: '1240px', margin: '0 auto', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
+          
+          {/* Brand Emblem */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                backgroundColor: '#09090B',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+                fontSize: '18px'
+              }}>
+                e
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: '#09090B', letterSpacing: '-0.3px' }}>eStore</span>
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    backgroundColor: '#F4F4F5',
+                    color: '#18181B',
+                    padding: '2px 7px',
+                    borderRadius: '9999px',
+                    border: '1px solid #E4E4E7'
+                  }}>
+                    estore.eshamikh.com
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#71717A' }}>متجر الشامخ الفاخر للتجارة الإلكترونية</span>
+              </div>
+            </Link>
           </div>
-          <div className="white-brand-text">
-            <span className="white-brand-title">منظومة إشمخ السحابية</span>
-            <span className="white-brand-subtitle">eShamikh Cloud Ecosystem</span>
-          </div>
-        </div>
 
-        <div className="white-navbar-actions">
-          <span className="badge-pill success">
-            <span style={{ width: '6px', height: '6px', borderRadius: '9999px', backgroundColor: '#059669' }} />
-            الخدمات متصلة ونشطة
-          </span>
+          {/* Search Bar & Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            
+            <div style={{ position: 'relative', width: '220px' }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="البحث في المعروضات..."
+                className="account-input-field"
+                style={{ paddingRight: '34px', fontSize: '12.5px', borderRadius: '9999px', padding: '7px 34px 7px 12px' }}
+              />
+              <Search size={14} color="#71717A" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            </div>
+
+            {/* Merchant Dashboard Shortcut */}
+            <Link
+              href="/estore/dashboard"
+              className="btn-white-secondary"
+              style={{ borderRadius: '9999px', fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              title="لوحة تحكم وإدارة المتجر"
+            >
+              <Store size={14} />
+              <span>لوحة التاجر</span>
+            </Link>
+
+            {/* Account Settings */}
+            <Link
+              href="/account"
+              className="btn-white-icon"
+              title="إدارة الحساب والملف الشخصي"
+            >
+              <User size={16} />
+            </Link>
+
+            {/* Cart Button */}
+            <button
+              onClick={() => setCartOpen(true)}
+              className="btn-white-primary"
+              style={{ borderRadius: '9999px', padding: '7px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <ShoppingCart size={16} />
+              <span>السلة</span>
+              {cartItemsCount > 0 && (
+                <span style={{
+                  background: '#FFFFFF',
+                  color: '#09090B',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '1px 6px',
+                  borderRadius: '9999px',
+                  marginRight: '2px'
+                }}>
+                  {cartItemsCount}
+                </span>
+              )}
+            </button>
+          </div>
+
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '32px 20px',
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '1040px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-          gap: '40px',
-          alignItems: 'center',
+      {/* ── Main Storefront Area ── */}
+      <main className="estore-container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '32px 24px 80px', width: '100%' }}>
+        
+        {/* Editorial Hero Banner (Apple / Vercel Store Style) */}
+        <div className="estore-hero" style={{
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)',
+          border: '1px solid #E4E4E7',
+          borderRadius: '24px',
+          padding: '48px 40px',
+          marginBottom: '36px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          boxShadow: '0 4px 20px -8px rgba(0,0,0,0.03)'
         }}>
-          
-          {/* Right Hero / Branding Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="badge-pill gold" style={{
+              background: '#FEF9C3',
+              color: '#854D0E',
+              border: '1px solid #FEF08A',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              fontSize: '11.5px',
+              fontWeight: 700,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '6px 14px',
-              borderRadius: '9999px',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E4E4E7',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-              width: 'fit-content'
+              gap: '5px'
             }}>
-              <ShieldCheck size={16} color="#059669" />
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#27272A' }}>
-                بوابة المصادقة المركزية الموحدة (SSO)
-              </span>
-            </div>
-
-            <h1 style={{
-              fontSize: '36px',
-              fontWeight: 800,
-              color: '#09090B',
-              lineHeight: 1.35,
-              letterSpacing: '-0.02em',
-              margin: 0,
-            }}>
-              منصة سحابية متكاملة <br />
-              <span style={{ color: '#71717A', fontWeight: 600 }}>للتجارة، الروابط، وإدارة الأعمال</span>
-            </h1>
-
-            <p style={{
-              fontSize: '15px',
-              color: '#52525B',
-              lineHeight: 1.7,
-              margin: 0,
-            }}>
-              &quot;المشروع اللي ما تدفع بيه شوية.. مايطلع لك فلس&quot;
-              <br />
-              إدارة مركزية موحدة لحسابك السحابي، متاجرك الإلكترونية، وروابطك المحمية.
-            </p>
-
-            {/* Ecosystem Services Showcase Pills */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 14px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E4E4E7',
-                borderRadius: '12px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: '#18181B'
-              }}>
-                <Link2 size={16} color="#059669" />
-                <span>eLink للروابط الذكية</span>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 14px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E4E4E7',
-                borderRadius: '12px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: '#18181B'
-              }}>
-                <Store size={16} color="#C5A059" />
-                <span>eStore منصة المتاجر</span>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 14px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E4E4E7',
-                borderRadius: '12px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: '#18181B'
-              }}>
-                <ShieldCheck size={16} color="#09090B" />
-                <span>درع الأمان السحابي</span>
-              </div>
-            </div>
+              <Sparkles size={12} />
+              مجموعة 2026 الحصرية • متجر الشامخ الفاخر
+            </span>
           </div>
 
-          {/* Left Auth Container Card */}
-          <div style={{
-            background: '#FFFFFF',
-            border: '1px solid #E4E4E7',
-            borderRadius: '24px',
-            padding: '32px 28px',
-            boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
+          <h1 style={{
+            fontSize: '34px',
+            fontWeight: 800,
+            color: '#09090B',
+            letterSpacing: '-0.02em',
+            margin: 0,
+            lineHeight: 1.3
           }}>
-            {/* Redirect Notice */}
-            {redirectTo && (
-              <div style={{
-                padding: '8px 12px',
-                borderRadius: '10px',
-                backgroundColor: '#F4F4F5',
-                border: '1px solid #E4E4E7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '11.5px',
-              }}>
-                <span style={{ color: '#71717A', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <ExternalLink size={13} />
-                  الوجهة المطلوبة:
-                </span>
-                <span style={{ color: '#09090B', fontFamily: 'monospace', direction: 'ltr' }}>
-                  {redirectTo}
-                </span>
-              </div>
-            )}
+            أناقة متناهية ودقة مطلقة في كل التفاصيل
+          </h1>
 
-            {/* Authenticated State */}
-            {currentUser ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <UserAvatar
-                    userId={currentUser.id}
-                    avatarUrl={userProfile?.avatar_url}
-                    fullName={userProfile?.full_name || currentUser.user_metadata?.full_name}
-                    email={currentUser.email}
-                    size="lg"
-                  />
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span className="badge-pill success">
-                        <ShieldCheck size={11} />
-                        جلسة موثقة
-                      </span>
-                    </div>
-                    <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#09090B', margin: 0 }}>
-                      {userProfile?.full_name || currentUser.user_metadata?.full_name || 'مستخدم معتمد'}
-                    </h2>
-                    <p style={{ fontSize: '12px', color: '#71717A', margin: 0 }}>
-                      {currentUser.email}
-                    </p>
+          <p style={{
+            fontSize: '14.5px',
+            color: '#52525B',
+            lineHeight: 1.7,
+            maxWidth: '680px',
+            margin: 0
+          }}>
+            اكتشف تشكيلتنا المنتقاة بعناية فائقة. شحن سريع وموثوق إلى كافة محافظات العراق، مع ضمان الاستبدال المباشر والدفع الإلكتروني الآمن عبر بطاقات كي كارد أو عند الاستلام.
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#27272A', fontWeight: 500 }}>
+              <Truck size={16} color="#059669" />
+              <span>توصيل سريع لكافة المحافظات</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#27272A', fontWeight: 500 }}>
+              <ShieldCheck size={16} color="#059669" />
+              <span>ضمان جودة eStore 100%</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#27272A', fontWeight: 500 }}>
+              <CreditCard size={16} color="#059669" />
+              <span>دفع عبر كي كارد أو نقداً</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Filters Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {[
+              { id: 'all', label: 'جميع المعروضات' },
+              { id: 'إلكترونيات', label: 'إلكترونيات' },
+              { id: 'إكسسوارات', label: 'إكسسوارات وساعات' },
+              { id: 'حقائب', label: 'حقائب' },
+              { id: 'عطور', label: 'عطور' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedCategory(tab.id)}
+                style={{
+                  padding: '7px 16px',
+                  borderRadius: '9999px',
+                  fontSize: '12.5px',
+                  fontWeight: selectedCategory === tab.id ? 700 : 500,
+                  background: selectedCategory === tab.id ? '#18181B' : '#FFFFFF',
+                  color: selectedCategory === tab.id ? '#FFFFFF' : '#52525B',
+                  border: `1px solid ${selectedCategory === tab.id ? '#18181B' : '#E4E4E7'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <span style={{ fontSize: '13px', color: '#71717A', fontWeight: 500 }}>
+            عرض {filteredProducts.length} منتج
+          </span>
+        </div>
+
+        {/* Product Grid */}
+        <div className="estore-product-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '24px'
+        }}>
+          {filteredProducts.map(product => (
+            <div key={product.id} className="estore-product-card" style={{
+              background: '#FFFFFF',
+              border: '1px solid #E4E4E7',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+              transition: 'all 0.2s ease'
+            }}>
+              {/* Product Image Container */}
+              <div style={{ position: 'relative', height: '260px', width: '100%', overflow: 'hidden', background: '#F4F4F5' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={product.image}
+                  alt={product.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }}
+                  loading="lazy"
+                />
+
+                {/* Floating Pill Price Badge (Apple / Vercel style) */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '12px',
+                  right: '12px',
+                  background: 'rgba(255, 255, 255, 0.92)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid #E4E4E7',
+                  borderRadius: '9999px',
+                  padding: '4px 12px',
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  color: '#09090B',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                }}>
+                  {product.price.toLocaleString()} د.ع
+                </div>
+              </div>
+
+              {/* Product Content Info */}
+              <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '10px' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#71717A' }}>
+                      {product.category}
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: '#B45309', fontWeight: 700 }}>
+                      ★ {product.rating}
+                    </span>
                   </div>
+
+                  <h3 style={{ fontSize: '14.5px', fontWeight: 700, color: '#09090B', margin: '0 0 6px 0', lineHeight: 1.4 }}>
+                    {product.title}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#71717A', margin: 0, lineHeight: 1.6, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    {product.description}
+                  </p>
                 </div>
 
-                {/* Account UID */}
+                {/* Card Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="btn-white-primary"
+                    style={{ flex: 1, padding: '8px 12px', borderRadius: '10px', fontSize: '12.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    <Plus size={14} />
+                    <span>إضافة للسلة</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setQuickViewProduct(product);
+                      setSelectedColor(product.colors[0]);
+                    }}
+                    className="btn-white-secondary"
+                    style={{ padding: '8px', borderRadius: '10px' }}
+                    title="معاينة سريعة"
+                  >
+                    <Eye size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* ── Slide-over Cart Drawer ── */}
+      {cartOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 900,
+            backgroundColor: 'rgba(9, 9, 11, 0.4)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            justifyContent: 'flex-start'
+          }}
+          onClick={() => setCartOpen(false)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              height: '100%',
+              background: '#FFFFFF',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '-10px 0 30px rgba(0,0,0,0.1)'
+            }}
+            onClick={e => e.stopPropagation()}
+            dir="rtl"
+          >
+            {/* Drawer Header */}
+            <div style={{
+              padding: '18px 22px',
+              borderBottom: '1px solid #E4E4E7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#FAFAFA'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ShoppingCart size={20} color="#09090B" />
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#09090B', margin: 0 }}>
+                  سلة المشتريات ({cartItemsCount})
+                </h3>
+              </div>
+
+              <button
+                onClick={() => setCartOpen(false)}
+                className="btn-white-icon"
+                style={{ width: '30px', height: '30px' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Cart Items List */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {checkoutComplete ? (
                 <div style={{
+                  padding: '36px 16px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  backgroundColor: '#FAFAFA',
-                  border: '1px solid #E4E4E7',
-                  borderRadius: '12px',
-                  fontSize: '12px',
+                  gap: '12px',
+                  textAlign: 'center'
                 }}>
-                  <span style={{ color: '#71717A' }}>معرّف الحساب:</span>
-                  <span style={{ fontFamily: 'monospace', color: '#09090B', direction: 'ltr', fontSize: '11px' }}>
-                    {currentUser.id.slice(0, 18)}...
-                  </span>
-                  <button 
-                    onClick={handleCopyUserId}
+                  <div style={{ width: '56px', height: '56px', borderRadius: '9999px', backgroundColor: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckCircle2 size={32} />
+                  </div>
+                  <h4 style={{ fontSize: '18px', fontWeight: 700, color: '#09090B', margin: 0 }}>تم تسجيل طلبك بنجاح!</h4>
+                  <p style={{ fontSize: '13px', color: '#71717A', margin: 0 }}>
+                    سيصلك إشعار عبر الهاتف لتتبع الشحنة مع مندوب التوصيل في بغداد والمحافظات.
+                  </p>
+                </div>
+              ) : cart.length > 0 ? (
+                cart.map(item => (
+                  <div
+                    key={item.product.id}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      fontSize: '11px',
-                      color: copiedId ? '#059669' : '#09090B',
-                      background: '#FFFFFF',
+                      gap: '12px',
+                      padding: '12px',
+                      borderRadius: '12px',
                       border: '1px solid #E4E4E7',
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
+                      background: '#FFFFFF'
                     }}
                   >
-                    {copiedId ? <Check size={12} /> : <Copy size={12} />}
-                    <span>{copiedId ? 'تم' : 'نسخ'}</span>
-                  </button>
-                </div>
-
-                {/* Primary CTA Button */}
-                <Link
-                  href={redirectTo || '/services'}
-                  className="btn-white-primary"
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', fontSize: '14px' }}
-                >
-                  <Compass size={17} />
-                  <span>{redirectTo ? 'المتابعة إلى الخدمة المطلوبة' : 'الانتقال إلى بوابة الخدمات السحابية'}</span>
-                  <ArrowLeft size={16} />
-                </Link>
-
-                {/* Shortcuts Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <Link href="/elink" className="white-card interactive" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F4F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Link2 size={16} color="#09090B" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#09090B' }}>eLink</div>
-                      <div style={{ fontSize: '11px', color: '#71717A' }}>إدارة الروابط</div>
-                    </div>
-                  </Link>
-
-                  <Link href="/services" className="white-card interactive" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F4F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Layers size={16} color="#09090B" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#09090B' }}>الخدمات</div>
-                      <div style={{ fontSize: '11px', color: '#71717A' }}>جميع الأدوات</div>
-                    </div>
-                  </Link>
-                </div>
-
-                {/* Signout Button */}
-                <button
-                  onClick={handleSignOut}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    padding: '9px',
-                    borderRadius: '10px',
-                    color: '#DC2626',
-                    background: '#FEF2F2',
-                    border: '1px solid #FECACA',
-                    fontSize: '12.5px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    marginTop: '6px'
-                  }}
-                >
-                  <LogOut size={14} />
-                  <span>تسجيل الخروج من الجلسة</span>
-                </button>
-              </div>
-            ) : (
-              /* Auth Tabs and Form */
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                
-                {/* Clean Mode Switcher Tabs */}
-                <div style={{
-                  display: 'flex',
-                  backgroundColor: '#F4F4F5',
-                  padding: '4px',
-                  borderRadius: '12px',
-                  border: '1px solid #E4E4E7'
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => { setMode('signin'); setMessage(null); }}
-                    style={{
-                      flex: 1,
-                      padding: '8px 14px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: mode === 'signin' ? '#09090B' : '#71717A',
-                      backgroundColor: mode === 'signin' ? '#FFFFFF' : 'transparent',
-                      boxShadow: mode === 'signin' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    تسجيل الدخول
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setMode('signup'); setMessage(null); }}
-                    style={{
-                      flex: 1,
-                      padding: '8px 14px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: mode === 'signup' ? '#09090B' : '#71717A',
-                      backgroundColor: mode === 'signup' ? '#FFFFFF' : 'transparent',
-                      boxShadow: mode === 'signup' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    إنشاء حساب جديد
-                  </button>
-                </div>
-
-                {/* Alert Messages */}
-                {message && (
-                  <div style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    fontSize: '12.5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    backgroundColor: message.type === 'success' ? '#ECFDF5' : '#FEF2F2',
-                    border: `1px solid ${message.type === 'success' ? '#A7F3D0' : '#FECACA'}`,
-                    color: message.type === 'success' ? '#059669' : '#DC2626',
-                  }}>
-                    {message.type === 'success' ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
-                    <span>{message.text}</span>
-                  </div>
-                )}
-
-                {/* Form */}
-                <form onSubmit={mode === 'signin' ? handleSignIn : handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  
-                  {mode === 'signup' && (
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#27272A', marginBottom: '6px' }}>
-                        الاسم الكامل
-                      </label>
-                      <div style={{ position: 'relative' }}>
-                        <input
-                          type="text"
-                          required
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          placeholder="الاسم الكريم"
-                          className="white-input"
-                          style={{ paddingRight: '38px' }}
-                        />
-                        <User size={15} color="#71717A" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.product.image}
+                      alt={item.product.title}
+                      style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '8px' }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#09090B' }}>
+                        {item.product.title}
+                      </div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#059669', marginTop: '2px' }}>
+                        {item.product.price.toLocaleString()} د.ع
                       </div>
                     </div>
-                  )}
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#27272A', marginBottom: '6px' }}>
-                      البريد الإلكتروني
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="name@example.com"
-                        className="white-input"
-                        style={{ paddingRight: '38px', direction: 'ltr', textAlign: 'right' }}
-                      />
-                      <Mail size={15} color="#71717A" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#27272A' }}>
-                        كلمة المرور
-                      </label>
-                      {mode === 'signup' && (
-                        <span style={{ fontSize: '11px', color: '#71717A' }}>6 أحرف على الأقل</span>
-                      )}
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        minLength={6}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="white-input"
-                        style={{ paddingRight: '38px', paddingLeft: '38px', direction: 'ltr' }}
-                      />
-                      <Lock size={15} color="#71717A" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                    {/* Quantity Controls */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        style={{
-                          position: 'absolute',
-                          left: '12px',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          color: '#71717A',
-                          cursor: 'pointer'
-                        }}
+                        onClick={() => updateQuantity(item.product.id, -1)}
+                        style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #E4E4E7', background: '#F4F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                       >
-                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        <Minus size={12} />
+                      </button>
+                      <span style={{ fontSize: '13px', fontWeight: 700, minWidth: '18px', textAlign: 'center' }}>
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.product.id, 1)}
+                        style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #E4E4E7', background: '#F4F4F5', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      >
+                        <Plus size={12} />
                       </button>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div style={{
+                  padding: '48px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#71717A',
+                  textAlign: 'center'
+                }}>
+                  <ShoppingBag size={36} />
+                  <p style={{ fontSize: '13.5px', margin: 0 }}>سلة التسوق فارغة حالياً</p>
+                  <span style={{ fontSize: '11.5px' }}>اختر منتجاً فاخراً لتجربة الشراء المباشر</span>
+                </div>
+              )}
+            </div>
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-white-primary"
-                    style={{ width: '100%', padding: '12px', borderRadius: '12px', fontSize: '14px', marginTop: '6px' }}
-                  >
-                    {loading ? (
-                      <span>جاري المعالجة...</span>
-                    ) : (
-                      <>
-                        <span>{mode === 'signin' ? 'تسجيل الدخول' : 'إنشاء الحساب فورياً'}</span>
-                        {mode === 'signin' ? <ArrowLeft size={16} /> : <Sparkles size={16} />}
-                      </>
-                    )}
-                  </button>
+            {/* Drawer Footer */}
+            {cart.length > 0 && !checkoutComplete && (
+              <div style={{
+                padding: '18px 22px',
+                borderTop: '1px solid #E4E4E7',
+                background: '#FAFAFA',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: '#71717A' }}>
+                  <span>المجموع الفرعي:</span>
+                  <span style={{ fontWeight: 700, color: '#09090B' }}>
+                    {cartTotal.toLocaleString()} د.ع
+                  </span>
+                </div>
 
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    fontSize: '11.5px',
-                    color: '#71717A',
-                    marginTop: '4px'
-                  }}>
-                    <ShieldCheck size={14} color="#059669" />
-                    <span>اتصال سحابي آمن ومشفر بالكامل</span>
-                  </div>
-                </form>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: '#71717A' }}>
+                  <span>أجور التوصيل (كافة المحافظات):</span>
+                  <span style={{ color: '#059669', fontWeight: 600 }}>مجاني (عرض إطلاق eStore)</span>
+                </div>
+
+                <div style={{ height: '1px', backgroundColor: '#E4E4E7', margin: '2px 0' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '15px', fontWeight: 800, color: '#09090B' }}>
+                  <span>الإجمالي النهائي:</span>
+                  <span style={{ color: '#09090B' }}>
+                    {cartTotal.toLocaleString()} د.ع
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleCheckout}
+                  className="btn-white-primary"
+                  style={{ width: '100%', padding: '13px', borderRadius: '12px', fontSize: '14px', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <CreditCard size={16} />
+                  <span>إتمام الطلب والدفع المباشر</span>
+                </button>
               </div>
             )}
           </div>
-
         </div>
-      </main>
-    </div>
-  );
-}
+      )}
 
-export default function CentralSSOHomePage() {
-  return (
-    <Suspense fallback={
-      <div style={{
-        height: '100dvh',
-        backgroundColor: '#FAFAFA',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#71717A',
-        fontSize: '14px',
-        direction: 'rtl'
-      }}>
-        جاري تهيئة البوابة السحابية...
-      </div>
-    }>
-      <CentralSSOContent />
-    </Suspense>
+      {/* ── Quick View Modal ── */}
+      {quickViewProduct && (
+        <div className="settings-modal-backdrop" onClick={() => setQuickViewProduct(null)} style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '16px'
+        }}>
+          <div
+            className="settings-modal-box"
+            onClick={e => e.stopPropagation()}
+            dir="rtl"
+            style={{
+              maxWidth: '640px',
+              width: '100%',
+              background: '#FFFFFF',
+              borderRadius: '20px',
+              border: '1px solid #E4E4E7',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{
+              padding: '16px 20px',
+              borderBottom: '1px solid #F4F4F5',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#09090B' }}>
+                معاينة المنتج السريعة
+              </span>
+              <button onClick={() => setQuickViewProduct(null)} className="btn-white-icon">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'center' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={quickViewProduct.image}
+                alt={quickViewProduct.title}
+                style={{ width: '100%', height: '240px', objectFit: 'cover', borderRadius: '14px', border: '1px solid #E4E4E7' }}
+              />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{
+                  width: 'fit-content',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  background: '#F4F4F5',
+                  color: '#18181B',
+                  padding: '3px 8px',
+                  borderRadius: '9999px'
+                }}>
+                  {quickViewProduct.category}
+                </span>
+
+                <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#09090B', margin: 0 }}>
+                  {quickViewProduct.title}
+                </h3>
+
+                <p style={{ fontSize: '12.5px', color: '#71717A', lineHeight: 1.6, margin: 0 }}>
+                  {quickViewProduct.description}
+                </p>
+
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#09090B' }}>
+                  {quickViewProduct.price.toLocaleString()} د.ع
+                </div>
+
+                <button
+                  onClick={() => {
+                    addToCart(quickViewProduct, selectedColor);
+                    setQuickViewProduct(null);
+                  }}
+                  className="btn-white-primary"
+                  style={{ width: '100%', padding: '11px', borderRadius: '10px', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <Plus size={15} />
+                  <span>إضافة لسلة الشراء</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

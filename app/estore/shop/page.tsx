@@ -176,9 +176,9 @@ export default function EstoreShopClientPage() {
       {/* Storefront Top Navbar */}
       <header className="white-navbar">
         <div className="white-navbar-brand">
-          <Link href="/services" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717A', textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717A', textDecoration: 'none' }}>
             <ArrowRight size={16} />
-            <span style={{ fontSize: '13px', fontWeight: 600 }}>بوابة المنظومة</span>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>الرئيسية</span>
           </Link>
           <div style={{ width: '1px', height: '20px', backgroundColor: '#E4E4E7', margin: '0 8px' }} />
           <Link href="/estore/shop" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>

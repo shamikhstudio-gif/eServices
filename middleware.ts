@@ -204,15 +204,21 @@ export async function middleware(request: NextRequest) {
   }
 
   // =========================================================================
-  // 2. Central SSO Routing Guard
+  // 2. eStore Routing & Guard
   // =========================================================================
-  // Redirect to /?redirect_to=<ORIGIN_URL> if accessing protected routes without active session
+  // Automatic redirects for legacy/shortcut routes
+  if (pathname === '/services' || pathname.startsWith('/services/')) {
+    return NextResponse.redirect(new URL('/estore/dashboard', request.url));
+  }
+  if (pathname === '/dashboard') {
+    return NextResponse.redirect(new URL('/estore/dashboard', request.url));
+  }
+
+  // Protect merchant dashboard and account settings
   if (
-    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/estore/dashboard') ||
     pathname.startsWith('/account') ||
-    pathname.startsWith('/services') ||
-    pathname.startsWith('/elink') ||
-    pathname.startsWith('/estore/dashboard')
+    pathname.startsWith('/elink')
   ) {
     const allCookies = request.cookies.getAll();
     const hasAuthCookie = allCookies.some((c) =>
@@ -226,7 +232,7 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.searchParams.get('preview') === 'true';
 
     if (!hasAuthCookie && !isDemo) {
-      const authUrl = new URL('/', request.url);
+      const authUrl = new URL('/auth', request.url);
       authUrl.searchParams.set('redirect_to', request.nextUrl.pathname + request.nextUrl.search);
       return NextResponse.redirect(authUrl);
     }
@@ -238,9 +244,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/api/:path*',
-    '/dashboard/:path*',
-    '/account/:path*',
     '/services/:path*',
+    '/services',
+    '/dashboard',
+    '/account/:path*',
     '/elink/:path*',
     '/estore/dashboard/:path*',
   ],
