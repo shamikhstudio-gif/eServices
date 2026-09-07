@@ -15,8 +15,8 @@ import type { NextRequest } from 'next/server';
 const HMAC_SECRET = process.env.HMAC_SECRET_KEY || 'eshamikh_internal_hmac_secret_key_2026';
 const MAX_DRIFT_MS = 60000; // 60 seconds
 
-// Paths exempt from HMAC signing (e.g. auth callbacks, public MCP server, and public link verification)
-const EXEMPT_PATHS = ['/api/auth/callback', '/api/mcp', '/api/s'];
+// Paths exempt from HMAC signing (e.g. auth callbacks and public link verification)
+const EXEMPT_PATHS = ['/api/auth/callback', '/api/s'];
 
 /**
  * Constant-time byte comparison to protect against timing attacks

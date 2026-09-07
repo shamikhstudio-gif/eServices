@@ -40,7 +40,7 @@ const SERVICES: ServiceDef[] = [
     href: '/elink',
     status: 'active',
     badge: 'نشط ومتاح',
-    features: ['روابط ذكية ومحمية', 'استوديو QR فكتور عالي الدقة', 'تحليلات زيارات مشفرة GDPR', 'تكامل خادم MCP'],
+    features: ['روابط ذكية ومحمية', 'استوديو QR فكتور عالي الدقة', 'تحليلات زيارات مشفرة GDPR', 'تكامل الروابط السحابية'],
   },
   {
     id: 'estore-dashboard',
@@ -115,7 +115,7 @@ function ServicesPageContent() {
 
   // Settings Modal State
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<'account' | 'profile' | 'security' | 'preferences' | 'mcp'>('account');
+  const [settingsTab, setSettingsTab] = useState<'account' | 'profile' | 'security' | 'preferences'>('account');
 
   // Waffle menu
   const [waffleOpen, setWaffleOpen] = useState(false);
@@ -143,7 +143,10 @@ function ServicesPageContent() {
     // Check if openSettings parameter is present
     const openSettings = searchParams.get('openSettings');
     if (openSettings) {
-      setSettingsTab(openSettings as any || 'account');
+      const validTab = ['account', 'profile', 'security', 'preferences'].includes(openSettings)
+        ? (openSettings as any)
+        : 'account';
+      setSettingsTab(validTab);
       setSettingsOpen(true);
     }
   }, [searchParams]);
@@ -260,7 +263,7 @@ function ServicesPageContent() {
           <button
             onClick={() => { setSettingsTab('account'); setSettingsOpen(true); }}
             className="btn-white-icon"
-            title="الإعدادات وخادم MCP"
+            title="إعدادات الحساب والنظام"
           >
             <Settings size={18} />
           </button>
@@ -451,52 +454,6 @@ function ServicesPageContent() {
           ))}
         </div>
 
-        {/* MCP Banner Strip */}
-        <div style={{
-          background: '#FFFFFF',
-          border: '1px solid #E4E4E7',
-          borderRadius: '20px',
-          padding: '24px 28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '16px',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              background: '#F4F4F5',
-              border: '1px solid #E4E4E7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#09090B'
-            }}>
-              <Server size={22} />
-            </div>
-            <div>
-              <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#09090B', margin: 0 }}>
-                خادم eShamikh Model Context Protocol (MCP) & API
-              </h4>
-              <p style={{ fontSize: '12.5px', color: '#71717A', margin: '2px 0 0 0' }}>
-                اربط مشاريعك الذكية (Cursor / Windsurf / Claude) مع قواعد بيانات المنظومة وأدر أدواتك برمجياً
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => { setSettingsTab('mcp'); setSettingsOpen(true); }}
-            className="btn-white-secondary"
-            style={{ borderRadius: '10px' }}
-          >
-            <span>إعدادات وتوليد مفاتيح MCP</span>
-            <ChevronLeft size={16} />
-          </button>
-        </div>
       </main>
 
       {/* Settings Modal */}

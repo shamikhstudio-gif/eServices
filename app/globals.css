@@ -1230,33 +1230,6 @@ input, select, textarea {
   width: fit-content;
 }
 
-/* MCP Linker Styles */
-.mcp-project-card {
-  background: #FFFFFF;
-  border: 1px solid #E4E4E7;
-  border-radius: 14px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
-
-.mcp-project-card:hover {
-  border-color: #D4D4D8;
-}
-
-.mcp-code-block {
-  background: #F4F4F5;
-  border: 1px solid #E4E4E7;
-  border-radius: 8px;
-  padding: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11.5px;
-  color: #18181B;
-  direction: ltr;
-  overflow-x: auto;
-}
 
 /* ── eLink Modals Common White Styles ──────────────────────────────────── */
 .settings-modal-box {

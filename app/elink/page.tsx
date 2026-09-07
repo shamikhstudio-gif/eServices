@@ -336,7 +336,7 @@ export default function ELinkDashboardPage() {
           <button 
             className="elink-settings-icon-btn"
             onClick={() => setIsSettingsOpen(true)}
-            title="الإعدادات العامة وخادم MCP"
+            title="الإعدادات العامة"
           >
             <Settings size={16} />
           </button>

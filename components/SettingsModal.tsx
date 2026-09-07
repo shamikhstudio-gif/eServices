@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import UserAvatar from './UserAvatar';
-import McpProjectLinker from './McpProjectLinker';
 import {
-  X, User, Shield, Sliders, PlugZap, CreditCard,
+  X, User, Shield, Sliders, CreditCard,
   Save, Loader2, Check, AlertCircle, Eye, EyeOff,
   Bell, Moon, Globe, LogOut, Copy, ExternalLink,
   Laptop, Clock, ShieldCheck, KeyRound, Sparkles,
@@ -31,14 +30,13 @@ interface SettingsModalProps {
   defaultTab?: Tab;
 }
 
-type Tab = 'account' | 'profile' | 'security' | 'preferences' | 'mcp';
+type Tab = 'account' | 'profile' | 'security' | 'preferences';
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'account', label: 'الحساب', icon: <User size={15} /> },
   { id: 'profile', label: 'الملف الشخصي', icon: <Sparkles size={15} /> },
   { id: 'security', label: 'الأمان', icon: <Shield size={15} /> },
   { id: 'preferences', label: 'التفضيلات', icon: <Sliders size={15} /> },
-  { id: 'mcp', label: 'خادم MCP', icon: <PlugZap size={15} /> },
 ];
 
 export default function SettingsModal({
@@ -656,18 +654,11 @@ export default function SettingsModal({
                   <div className="settings-card-header">
                     <div>
                       <h4 className="settings-card-title">مظهر المنصة (Theme)</h4>
-                      <p className="settings-card-desc">نمط الأوبسيديان الفاحم (Obsidian Luxury Dark) مفعل افتراضياً بدون إجهاد للعين</p>
+                      <p className="settings-card-desc">نمط التصميم الأبيض الفاخر النقي (Pure White Luxury) مفعل افتراضياً</p>
                     </div>
-                    <span className="settings-badge-role">Obsidian Pure Dark</span>
+                    <span className="settings-badge-role">Pure Luxury White</span>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* ══════════════ 5. MCP & ADMIN API TAB ══════════════ */}
-            {activeTab === 'mcp' && user && (
-              <div className="settings-section">
-                <McpProjectLinker userId={user.id} userEmail={user.email} />
               </div>
             )}
 

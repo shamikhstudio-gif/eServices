@@ -22,7 +22,6 @@ import {
   ArrowLeft,
   Sparkles,
   Link2,
-  Server,
   Compass,
   Store,
   Layers
@@ -261,7 +260,7 @@ function CentralSSOContent() {
               margin: 0,
             }}>
               منصة سحابية متكاملة <br />
-              <span style={{ color: '#71717A', fontWeight: 600 }}>للتجارة، الروابط، والذكاء الاصطناعي</span>
+              <span style={{ color: '#71717A', fontWeight: 600 }}>للتجارة، الروابط، وإدارة الأعمال</span>
             </h1>
 
             <p style={{
@@ -272,7 +271,7 @@ function CentralSSOContent() {
             }}>
               &quot;المشروع اللي ما تدفع بيه شوية.. مايطلع لك فلس&quot;
               <br />
-              إدارة مركزية موحدة لحسابك السحابي، متاجرك، روابطك المحمية، وبروتوكولات MCP.
+              إدارة مركزية موحدة لحسابك السحابي، متاجرك الإلكترونية، وروابطك المحمية.
             </p>
 
             {/* Ecosystem Services Showcase Pills */}
@@ -321,8 +320,8 @@ function CentralSSOContent() {
                 fontWeight: 600,
                 color: '#18181B'
               }}>
-                <Server size={16} color="#09090B" />
-                <span>خادم MCP السحابي</span>
+                <ShieldCheck size={16} color="#09090B" />
+                <span>درع الأمان السحابي</span>
               </div>
             </div>
           </div>
