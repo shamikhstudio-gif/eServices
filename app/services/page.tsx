@@ -270,8 +270,9 @@ function ServicesPageContent() {
 
           {/* User Profile Avatar Pill */}
           {user && (
-            <button
-              onClick={() => { setSettingsTab('profile'); setSettingsOpen(true); }}
+            <Link
+              href="/account"
+              title="إدارة الحساب والملف الشخصي"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -280,7 +281,8 @@ function ServicesPageContent() {
                 borderRadius: '9999px',
                 background: '#FFFFFF',
                 border: '1px solid #E4E4E7',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                textDecoration: 'none'
               }}
             >
               <UserAvatar
@@ -293,7 +295,7 @@ function ServicesPageContent() {
               <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#09090B' }}>
                 {profile?.full_name?.split(' ')[0] || user.email?.split('@')[0]}
               </span>
-            </button>
+            </Link>
           )}
         </div>
       </header>

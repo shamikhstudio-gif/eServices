@@ -343,7 +343,7 @@ export default function ELinkDashboardPage() {
 
           <NineDotsLauncher />
 
-          <div className="elink-user-pill" onClick={() => setIsSettingsOpen(true)}>
+          <Link href="/account" className="elink-user-pill" title="إدارة الحساب والملف الشخصي">
             <UserAvatar
               userId={user?.id || ''}
               avatarUrl={profile?.avatar_url}
@@ -355,9 +355,9 @@ export default function ELinkDashboardPage() {
               <span className="elink-user-name">
                 {profile?.full_name || user?.user_metadata?.full_name || 'حساب معتمد'}
               </span>
-              <span className="elink-user-role">eShamikh SSO</span>
+              <span className="elink-user-role">إدارة الحساب</span>
             </div>
-          </div>
+          </Link>
         </div>
 
       </header>

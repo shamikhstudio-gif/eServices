@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import UserAvatar from './UserAvatar';
 import {
@@ -224,7 +225,7 @@ export default function SettingsModal({
         <div className="settings-panel-header">
           <div className="settings-header-info">
             <h2 className="settings-panel-title">إعدادات المنظومة السحابية</h2>
-            <span className="settings-panel-sub">إدارة حسابك، ملفك الشخصي، أمان الجلسات، وخوادم الذكاء الاصطناعي</span>
+            <span className="settings-panel-sub">إدارة حسابك، ملفك الشخصي، أمان الجلسات، وتفضيلات النظام الموحد</span>
           </div>
           <button className="settings-close-btn" onClick={onClose} title="إغلاق (Esc)">
             <X size={18} />
@@ -271,6 +272,35 @@ export default function SettingsModal({
                 <div className="settings-section-head">
                   <h3 className="settings-section-title">إدارة الحساب السحابي (Account)</h3>
                   <p className="settings-section-desc">المعلومات الأساسية للهوية السحابية الموحدة وحالة الجلسة النشطة</p>
+                </div>
+
+                {/* Direct Link to /account Page */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  borderRadius: '12px',
+                  background: '#FAFAFA',
+                  border: '1px solid #E4E4E7',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Sparkles size={18} color="#18181B" />
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#09090B' }}>صفحة إدارة الحساب الموسعة (/account)</div>
+                      <div style={{ fontSize: '11.5px', color: '#71717A' }}>تعديل شامل للملف الشخصي، إدارة الأجهزة النشطة وتصدير البيانات</div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/account"
+                    onClick={onClose}
+                    className="btn-white-primary"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '7px 14px' }}
+                  >
+                    <span>فتح الصفحة الكاملة</span>
+                    <ExternalLink size={12} />
+                  </Link>
                 </div>
 
                 {/* SSO UID Box */}
